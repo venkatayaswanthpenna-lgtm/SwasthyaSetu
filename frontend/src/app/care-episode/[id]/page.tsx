@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { queueRequest } from '@/lib/db';
 
 export default function CareEpisodeDetail() {
   const params = useParams();
@@ -28,7 +29,7 @@ export default function CareEpisodeDetail() {
   const completedCount = steps.filter(s => s.status === 'COMPLETED').length;
   const completionRate = `${Math.round((completedCount / steps.length) * 100)}%`;
 
-  const handleUpdateStatus = (seq: number) => {
+  const handleUpdateStatus = async (seq: number) => {
     setSteps(steps.map(step => {
       if (step.seq === seq) {
         return { ...step, status: "COMPLETED", date: new Date().toISOString().split('T')[0] };
@@ -38,17 +39,19 @@ export default function CareEpisodeDetail() {
       }
       return step;
     }));
-    alert("Status Updated to COMPLETED!");
+    await queueRequest(`/api/care-episodes/${id}/steps/${seq}`, 'PUT', { status: 'COMPLETED' });
+    alert("Status Updated to COMPLETED! Action queued for sync.");
   };
 
-  const handleEscalateDelay = (seq: number) => {
+  const handleEscalateDelay = async (seq: number) => {
     setSteps(steps.map(step => {
       if (step.seq === seq) {
         return { ...step, status: "ESCALATED" };
       }
       return step;
     }));
-    alert("Delay Escalated to Medical Officer!");
+    await queueRequest(`/api/alerts`, 'POST', { type: 'DELAYED_CARE', episodeId: id, step: seq });
+    alert("Delay Escalated to Medical Officer! Alert queued for sync.");
   };
 
   return (

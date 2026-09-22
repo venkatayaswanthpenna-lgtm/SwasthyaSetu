@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { queueRequest } from '@/lib/db';
 
 // Mock Data
 const INITIAL_REFERRALS = [
@@ -19,11 +20,12 @@ export default function ReferralManagement() {
   const [newTo, setNewTo] = useState("");
   const [newService, setNewService] = useState("");
 
-  const handleAccept = (id: string) => {
+  const handleAccept = async (id: string) => {
     setReferrals(referrals.map(ref => 
       ref.id === id ? { ...ref, status: "SCHEDULED" } : ref
     ));
-    alert(`Referral ${id} Accepted & Scheduled!`);
+    await queueRequest(`/api/referrals/${id}/accept`, 'POST', {});
+    alert(`Referral ${id} Accepted & Scheduled! Action queued for sync.`);
   };
 
   const handleSearch = () => {
@@ -31,7 +33,7 @@ export default function ReferralManagement() {
     alert(`Searching capabilities for: ${searchQuery}... Found 2 nearby facilities.`);
   };
 
-  const handleCreateReferral = (e: React.FormEvent) => {
+  const handleCreateReferral = async (e: React.FormEvent) => {
     e.preventDefault();
     const newRef = {
       id: `REF-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -43,6 +45,9 @@ export default function ReferralManagement() {
       status: "PENDING"
     };
     setReferrals([newRef, ...referrals]);
+    
+    await queueRequest('/api/referrals', 'POST', newRef);
+
     setIsModalOpen(false);
     setNewPatient("");
     setNewTo("");

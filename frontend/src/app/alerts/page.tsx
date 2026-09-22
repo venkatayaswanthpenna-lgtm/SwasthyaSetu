@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { queueRequest } from '@/lib/db';
 
 // Mock Data
 const INITIAL_ESCALATIONS = [
@@ -12,9 +13,10 @@ const INITIAL_ESCALATIONS = [
 export default function ContinuityAlerts() {
   const [escalations, setEscalations] = useState(INITIAL_ESCALATIONS);
 
-  const handleResolve = (id: number) => {
+  const handleResolve = async (id: number) => {
     setEscalations(escalations.filter(esc => esc.id !== id));
-    alert(`Escalation ${id} marked as resolved!`);
+    await queueRequest(`/api/alerts/${id}/resolve`, 'POST', {});
+    alert(`Escalation ${id} marked as resolved! Action queued for sync.`);
   };
 
   const handleRunScan = () => {

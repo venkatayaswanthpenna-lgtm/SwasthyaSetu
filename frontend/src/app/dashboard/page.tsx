@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { SyncStatus } from '@/components/SyncStatus';
+import { queueRequest } from '@/lib/db';
 
 // Mock Data
 const INITIAL_EPISODES = [
@@ -16,7 +17,7 @@ export default function Dashboard() {
   const [newPatient, setNewPatient] = useState("");
   const [newNeed, setNewNeed] = useState("");
 
-  const handleAddEpisode = (e: React.FormEvent) => {
+  const handleAddEpisode = async (e: React.FormEvent) => {
     e.preventDefault();
     const newEp = {
       id: `CE-2024-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
@@ -27,7 +28,13 @@ export default function Dashboard() {
       nextStep: "Consultation",
       dueDate: new Date().toISOString().split('T')[0]
     };
+    
+    // Optimistic UI update
     setEpisodes([...episodes, newEp]);
+    
+    // Add to offline sync queue
+    await queueRequest('/api/care-episodes', 'POST', newEp);
+
     setIsModalOpen(false);
     setNewPatient("");
     setNewNeed("");

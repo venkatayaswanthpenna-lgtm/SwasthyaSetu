@@ -17,11 +17,40 @@ export function SyncStatus() {
     // Check initial status
     setIsOnline(typeof navigator !== 'undefined' && navigator.onLine);
 
-    const handleOnline = () => setIsOnline(true);
+    const processSyncQueue = async () => {
+      if (!navigator.onLine) return;
+      
+      const pendingItems = await db.syncQueue.where('status').equals('pending').toArray();
+      if (pendingItems.length === 0) return;
+
+      // Mark all as syncing
+      await Promise.all(pendingItems.map(item => 
+        db.syncQueue.update(item.id!, { status: 'syncing' })
+      ));
+
+      // Simulate API sync with a slight delay per item
+      for (const item of pendingItems) {
+        await new Promise(resolve => setTimeout(resolve, 800)); // Simulated network latency
+        console.log(`Synced ${item.method} to ${item.url}`);
+        // Delete after successful sync
+        await db.syncQueue.delete(item.id!);
+      }
+    };
+
+    const handleOnline = () => {
+      setIsOnline(true);
+      processSyncQueue();
+    };
+    
     const handleOffline = () => setIsOnline(false);
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+
+    // Initial check just in case we started online with pending items
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
+        processSyncQueue();
+    }
 
     return () => {
       window.removeEventListener('online', handleOnline);
