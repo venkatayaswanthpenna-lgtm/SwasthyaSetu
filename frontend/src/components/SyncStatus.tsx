@@ -62,10 +62,6 @@ export function SyncStatus() {
     
     const handleOffline = () => {
       setIsOnline(false);
-      // Automatically redirect to offline sync page if not already there and logged in (not on login/register pages)
-      if (pathname && !pathname.includes('/login') && !pathname.includes('/register') && pathname !== '/offline-sync') {
-        router.push('/offline-sync');
-      }
     };
 
     window.addEventListener('online', handleOnline);
