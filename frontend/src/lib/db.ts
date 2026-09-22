@@ -10,6 +10,14 @@ export interface OfflineSyncQueue {
   createdAt: string;
 }
 
+export interface SyncHistory {
+  id?: number;
+  action: string;
+  url: string;
+  syncedAt: string;
+  status: 'success' | 'failed';
+}
+
 export interface CachedCareEpisode {
   id: string; // The CE-... ID
   data: any;
@@ -18,12 +26,14 @@ export interface CachedCareEpisode {
 
 export class SwasthyaSetuDB extends Dexie {
   syncQueue!: Table<OfflineSyncQueue, number>;
+  syncHistory!: Table<SyncHistory, number>;
   cachedEpisodes!: Table<CachedCareEpisode, string>;
 
   constructor() {
     super('SwasthyaSetuDB');
-    this.version(1).stores({
+    this.version(2).stores({
       syncQueue: '++id, status, createdAt',
+      syncHistory: '++id, syncedAt, status',
       cachedEpisodes: 'id, lastUpdated'
     });
   }

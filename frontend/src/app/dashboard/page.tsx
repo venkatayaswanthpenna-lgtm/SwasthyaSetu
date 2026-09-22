@@ -44,16 +44,16 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50 font-sans">
       <nav className="bg-white shadow-sm px-6 py-4 flex justify-between items-center border-b">
         <div className="flex items-center gap-8">
-          <h1 className="text-2xl font-bold text-blue-800">SWASTHYASETU</h1>
+          <h1 className="text-2xl font-bold text-gray-800">SWASTHYASETU</h1>
           <div className="hidden md:flex gap-6">
             <Link href="/dashboard" className="text-blue-600 font-semibold border-b-2 border-blue-600">Dashboard</Link>
             <Link href="/referrals" className="text-gray-600 hover:text-gray-900 font-medium">Referrals</Link>
             <Link href="/alerts" className="text-gray-600 hover:text-gray-900 font-medium">Alerts</Link>
+            <Link href="/offline-sync" className="text-gray-600 hover:text-gray-900 font-medium">Offline Sync</Link>
           </div>
         </div>
         <div className="flex gap-4 items-center">
           <SyncStatus />
-          <span className="text-sm font-semibold bg-green-100 text-green-800 px-3 py-1 rounded-full">ASHA: Verified</span>
           <Link href="/login" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</Link>
         </div>
       </nav>
